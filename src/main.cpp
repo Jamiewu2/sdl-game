@@ -1,7 +1,9 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <expected>
 
+#include <fmt/core.h>
 #include "SDL2/SDL.h"
 
 using namespace std;
@@ -31,32 +33,24 @@ int main(int argc, char* argv[])
 
    //Initialize SDL
    if( SDL_Init( SDL_INIT_VIDEO ) < 0 )
-   {
-      printf( "SDL could not initialize! SDL_Error: %s\n", SDL_GetError() );
-   }  
-   else
-   {
-      //Create window
-      window = SDL_CreateWindow( "SDL Tutorial", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN );
-      if( window == NULL )
-      {
-         printf( "Window could not be created! SDL_Error: %s\n", SDL_GetError() );
-      }
-      else
-      {
-         //Get window surface
-         screenSurface = SDL_GetWindowSurface( window );
+      throw std::runtime_error(fmt::format("SDL could not initialize! SDL_Error: {}", SDL_GetError()));
 
-         //Fill the surface white
-         SDL_FillRect( screenSurface, NULL, SDL_MapRGB( screenSurface->format, 0xFF, 0xFF, 0xFF ) );
-         
-         //Update the surface
-         SDL_UpdateWindowSurface( window );
+   //Create window
+   window = SDL_CreateWindow( "SDL Tutorial", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN );
+   if( window == NULL )
+      throw std::runtime_error(fmt::format("Window could not be created! SDL_Error: %s\n", SDL_GetError()));
+      
+   //Get window surface
+   screenSurface = SDL_GetWindowSurface( window );
 
-         //Hack to get window to stay up
-         SDL_Event e; bool quit = false; while( quit == false ){ while( SDL_PollEvent( &e ) ){ if( e.type == SDL_QUIT ) quit = true; } }
-      }
-   }
+   //Fill the surface white
+   SDL_FillRect( screenSurface, NULL, SDL_MapRGB( screenSurface->format, 0xFF, 0xFF, 0xFF ) );
+   
+   //Update the surface
+   SDL_UpdateWindowSurface( window );
+
+   //Hack to get window to stay up
+   SDL_Event e; bool quit = false; while( quit == false ){ while( SDL_PollEvent( &e ) ){ if( e.type == SDL_QUIT ) quit = true; } }
 
    //Destroy window
    SDL_DestroyWindow( window );

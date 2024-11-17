@@ -1,5 +1,22 @@
-cmake_minimum_required(VERSION 3.5.0)
+include(FetchContent)
+
+cmake_minimum_required(VERSION 3.20.0)
 project(HelloSDL VERSION 0.1.0 LANGUAGES C CXX)
+
+# Debug
+# set(CMAKE_VERBOSE_MAKEFILE ON)
+
+# C++ Version stuff
+set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+#Dependencies
+FetchContent_Declare(fmt
+  GIT_REPOSITORY https://github.com/fmtlib/fmt.git
+  GIT_TAG master
+)
+FetchContent_MakeAvailable(fmt)
 
 # Create an option to switch between a system sdl library and a vendored sdl library
 option(MYGAME_VENDORED "Use vendored libraries" ON)
@@ -17,6 +34,8 @@ endif()
 # Create your game executable target as usual
 add_executable(HelloSDL src/main.cpp)
 
+set_property(TARGET HelloSDL PROPERTY CXX_STANDARD 23)
+
 # SDL2::SDL2main may or may not be available. It is e.g. required by Windows GUI applications
 if(TARGET SDL2::SDL2main)
     # It has an implicit dependency on SDL2 functions, so it MUST be added before SDL2::SDL2 (or SDL2::SDL2-static)
@@ -25,3 +44,6 @@ endif()
 
 # Link to the actual SDL2 library. SDL2::SDL2 is the shared SDL library, SDL2::SDL2-static is the static SDL libarary.
 target_link_libraries(HelloSDL PRIVATE SDL2::SDL2)
+
+# Link other dependencies
+target_link_libraries(HelloSDL PRIVATE fmt::fmt)
