@@ -32,7 +32,13 @@ else()
 endif()
 
 # Create your game executable target as usual
-add_executable(HelloSDL src/main.cpp)
+# Apparently this is bad practice, but I'm lazy to manually add every single new source file
+# file(GLOB_RECURSE SourceFiles src/**.cpp)
+add_executable(HelloSDL src/main.cpp
+        src/util/ExpectedWrapper.cpp
+        src/util/Dog.cpp
+    )
+target_include_directories(HelloSDL PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 set_property(TARGET HelloSDL PROPERTY CXX_STANDARD 23)
 

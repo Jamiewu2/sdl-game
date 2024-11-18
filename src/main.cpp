@@ -6,7 +6,8 @@
 #include <fmt/core.h>
 #include "SDL2/SDL.h"
 
-using namespace std;
+#include "util/ExpectedWrapper.h"
+#include "util/SDLWrapper.h"
 
 //Screen dimension constants
 const int SCREEN_WIDTH = 640;
@@ -24,6 +25,9 @@ int main(int argc, char* argv[])
 
    // SDL_Init(SDL_INIT_EVERYTHING);
 
+   // Dog dog;
+   // int a = dog.bark();
+   // std::cout << a << std::endl;
 
    //The window we'll be rendering to
    SDL_Window* window = nullptr;
@@ -32,14 +36,13 @@ int main(int argc, char* argv[])
    SDL_Surface* screenSurface = nullptr;
 
    //Initialize SDL
-   if( SDL_Init( SDL_INIT_VIDEO ) < 0 )
-      throw std::runtime_error(fmt::format("SDL could not initialize! SDL_Error: {}", SDL_GetError()));
+   SDL_Init(SDL_INIT_VIDEO)
+      .expect([]{ return fmt::format("SDL could not initialize! SDL_Error: {}", SDL_GetError()); });
 
    //Create window
-   window = SDL_CreateWindow( "SDL Tutorial", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN );
-   if( window == NULL )
-      throw std::runtime_error(fmt::format("Window could not be created! SDL_Error: %s\n", SDL_GetError()));
-      
+   window = SDL_CreateWindow( "SDL Tutorial", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN )
+      .expect([]{ return fmt::format("Window could not be created! SDL_Error: {}", SDL_GetError()); });
+
    //Get window surface
    screenSurface = SDL_GetWindowSurface( window );
 
