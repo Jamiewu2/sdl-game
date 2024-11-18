@@ -6,7 +6,6 @@
 #include <fmt/core.h>
 #include "SDL2/SDL.h"
 
-#include "util/ExpectedWrapper.h"
 #include "util/SDLWrapper.h"
 
 //Screen dimension constants
@@ -15,20 +14,6 @@ const int SCREEN_HEIGHT = 480;
 
 int main(int argc, char* argv[])
 {
-   // vector<string> msg {"Hello", "C++", "World", "from", "VS Code", "and the C++ extension!", "and CMake"};
-
-   // for (const string& word : msg)
-   // {
-   //    cout << word << " ";
-   // }
-   // cout << endl;
-
-   // SDL_Init(SDL_INIT_EVERYTHING);
-
-   // Dog dog;
-   // int a = dog.bark();
-   // std::cout << a << std::endl;
-
    //The window we'll be rendering to
    SDL_Window* window = nullptr;
    
@@ -62,5 +47,4 @@ int main(int argc, char* argv[])
    SDL_Quit();
 
    return 0;
-   
 }

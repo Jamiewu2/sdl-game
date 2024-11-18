@@ -13,6 +13,8 @@ class ExpectedWrapper {
             error_code(error_code)
         {};
 
+        // return val, or throw error if is an error
+        // error_fn -> function returns the error_message
         int expect(std::function<std::string(void)> error_fn);
 };
 
@@ -26,6 +28,8 @@ template <typename T> class ExpectedWrapperNull {
             obj(obj)
         {};
 
+        // return val, or throw error if is an error
+        // error_fn -> function returns the error_message
         T* expect(std::function<std::string(void)> error_fn);
 };
 
