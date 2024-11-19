@@ -8,7 +8,10 @@
 #include "input/input.h"
 #include "gl/gl_shader.h"
 
-
+#define _DEBUG
+#ifdef _DEBUG
+    #include "gl/gl_debug.h"
+#endif
 
 bool Engine::glInit() {
 
@@ -20,6 +23,11 @@ bool Engine::glInit() {
     }
 
     fprintf(stdout, "Status: Using GLEW %s\n", glewGetString(GLEW_VERSION));
+
+    #ifdef _DEBUG
+        // Initialise debug call-back
+        glDebugInit();
+    #endif
 
     //Use Vsync
     if( SDL_GL_SetSwapInterval( 0 ) < 0 )
@@ -109,6 +117,10 @@ Engine::Engine(Game& game, int width, int height) {
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
 
+    #ifdef _DEBUG
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
+    #endif
+
     //Create window
     this->app.window = SDL_CreateWindow( game.name().c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, WINDOW_FLAGS )
         .expect([]{ return fmt::format("Window could not be created! SDL_Error: {}", SDL_GetError()); });
@@ -129,13 +141,6 @@ Engine::Engine(Game& game, int width, int height) {
         printf( "Unable to initialize OpenGL!\n" );
         return;
     }
-
-    // app.renderer = SDL_CreateRenderer(app.window, -1, RENDERER_FLAGS);
-    // if (!app.renderer)
-    // {
-    //     printf("Failed to create renderer: %s\n", SDL_GetError());
-    //     exit(1);
-    // }
 }
 
 Engine::~Engine() {
@@ -149,7 +154,6 @@ void Engine::run() {
         presentScene();
         SDL_Delay(16);
     }
-    // SDL_Event e; bool quit = false; while( quit == false ){ while( SDL_PollEvent( &e ) ){ if( e.type == SDL_QUIT ) quit = true; } }
 };
 
 void Engine::shutdown() {

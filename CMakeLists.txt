@@ -43,6 +43,7 @@ find_package(GLEW REQUIRED)
 add_executable(HelloSDL src/main.cpp
         src/engine/engine.cpp
         src/engine/gl/gl_shader.cpp
+        src/engine/gl/gl_debug.cpp
         src/engine/util/ExpectedWrapper.cpp
         src/game.cpp
     )
