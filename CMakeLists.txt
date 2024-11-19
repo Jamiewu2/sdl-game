@@ -31,12 +31,20 @@ else()
     find_package(SDL2 REQUIRED CONFIG COMPONENTS SDL2main)
 endif()
 
+#glew, OPENGL
+find_package(OpenGL REQUIRED)
+find_package(GLEW REQUIRED)
+
+#add_subdirectory(vendored/glew/build/cmake EXCLUDE_FROM_ALL)
+
 # Create your game executable target as usual
 # Apparently this is bad practice, but I'm lazy to manually add every single new source file
 # file(GLOB_RECURSE SourceFiles src/**.cpp)
 add_executable(HelloSDL src/main.cpp
-        src/util/ExpectedWrapper.cpp
-        src/util/Dog.cpp
+        src/engine/engine.cpp
+        src/engine/gl/gl_shader.cpp
+        src/engine/util/ExpectedWrapper.cpp
+        src/game.cpp
     )
 target_include_directories(HelloSDL PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
@@ -52,4 +60,11 @@ endif()
 target_link_libraries(HelloSDL PRIVATE SDL2::SDL2)
 
 # Link other dependencies
-target_link_libraries(HelloSDL PRIVATE fmt::fmt)
+target_link_libraries(HelloSDL PRIVATE fmt::fmt OpenGL::GL GLEW::GLEW)
+
+#copy shaders
+# add_custom_command(
+#         TARGET HelloSDL POST_BUILD
+#         COMMAND ${CMAKE_COMMAND} -E copy_directory
+#                 ${CMAKE_SOURCE_DIR}/src/shaders
+#                 ${CMAKE_CURRENT_BINARY_DIR}/shaders)
