@@ -6,6 +6,7 @@
 #include <glm/gtx/type_aligned.hpp>
 #include <GL/glew.h>
 #include <vector>
+#include "../render/camera.h"
 
 using namespace glm;
 
@@ -108,3 +109,7 @@ void add_mesh();
 // bool GL_LoadScene(const char * p_cSceneFile, SceneData & SceneInfo);
 
 // void GL_UnloadScene(SceneData & SceneInfo);
+
+//returns the UBO id
+GLuint glCreateCamera(const Camera& camera);
+void glBindCamera(const Camera& camera, GLuint ui_UBO);

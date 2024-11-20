@@ -7,7 +7,7 @@ using namespace glm;
 
 // glGenBuffers(1, &g_uiVBO); // find 1 unused id to create a buffer, g_uiVBO_id = glGenBuffers(1)
 // glBindBuffer(GL_ARRAY_BUFFER, g_uiVBO); //actually create the buffer, of type GL_ARRAY_BUFFER
-// glBufferData(GL_ARRAY_BUFFER, sizeof(fVertexData), fVertexData, GL_STATIC_DRAW); // add the data
+// glBufferData(GL_ARRAY_BUFFER, sizeof(fVertexData), fVertexData, GL_STATIC_DRAW); // add the data, GL_STATIC_DRAW = a hint to the GPU on what the data use case will be
 
 //VBO = Vertex Buffer Object, data of where the vertices are
 //IBO = Index Buffer Object, data of where the triangles are (connecting the vertices in groups of 3)

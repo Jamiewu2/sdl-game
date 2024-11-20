@@ -3,7 +3,6 @@
 #include <string>
 #include <vector>
 #include "engine/mesh/primitives.h"
-#include "engine/render/Renderable.h"
 
 using std::string;
 class Game {

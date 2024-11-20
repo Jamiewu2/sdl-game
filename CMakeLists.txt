@@ -60,8 +60,10 @@ add_executable(HelloSDL src/main.cpp
         src/engine/engine.cpp
         src/engine/gl/gl_shader.cpp
         src/engine/gl/gl_debug.cpp
+        src/engine/gl/gl_scene.cpp
         src/engine/util/ExpectedWrapper.cpp
         src/engine/mesh/primitives.cpp
+        src/engine/render/camera.cpp
         src/game.cpp
     )
 target_include_directories(HelloSDL PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)

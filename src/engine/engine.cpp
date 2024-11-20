@@ -9,6 +9,8 @@
 #include "gl/gl_shader.h"
 #include <magic_enum/magic_enum.hpp>
 #include <iostream>
+#define GLM_ENABLE_EXPERIMENTAL
+#include "glm/ext.hpp"
 
 #define _DEBUG
 
@@ -27,6 +29,23 @@ int Engine::add_primitive(Primitives::PrimitiveType type, float size) {
             throw std::runtime_error(fmt::format("Unknown Type: {}", magic_enum::enum_name(type)));
             break;
     }
+}
+
+Camera Engine::create_camera() {
+    float aspect_ratio = (float)app.width/(float)app.height;
+    // std::cout << aspect_ratio << std::endl;
+
+    CameraData camera_data {
+        .position = vec3(0.0f, 0.0f, 12.0f),
+        .direction = vec3(0.0f, 0.0f, -1.0f),
+        .up_vec = normalize(vec3(1.0f, 1.0f, 0.0f)),
+        .fov = 45.0f,
+        .aspect = aspect_ratio,
+        .near = 0.1f,
+        .far = 100.0f
+    };
+
+    return Camera(camera_data);
 }
 
 
@@ -84,8 +103,8 @@ bool Engine::glInit() {
     glDeleteShader(uiFragmentShader);
 
     // Create a Vertex Array Object
-    glGenVertexArrays(1, &g_uiVAO);
-    glBindVertexArray(g_uiVAO);
+    // glGenVertexArrays(1, &g_uiVAO);
+    // glBindVertexArray(g_uiVAO);
 
     // Create VBO data
     // GLfloat fVertexData[] =
@@ -110,7 +129,16 @@ bool Engine::glInit() {
     // this->gl_context.g_uiVAO = g_uiVAO;
     // this->gl_context.g_uiVBO = g_uiVBO;
 
+    //tmp stuff
     add_primitive(Primitives::CUBE, 1.0f);
+
+    //create camera
+    this->main_camera.camera = std::make_unique<Camera>(create_camera());
+    GLuint uiUBO = glCreateCamera(*(main_camera.camera));
+    main_camera.g_uiUBO = uiUBO;
+    // assume camera never changes
+    // Bind camera UBO
+    glBindBufferBase(GL_UNIFORM_BUFFER, 1, uiUBO);
 
 
     this->gl_programs.g_uiMainProgram = g_uiMainProgram;
@@ -125,6 +153,8 @@ Engine::Engine(Game& game, int width, int height) {
     const int RENDERER_FLAGS = SDL_RENDERER_ACCELERATED;
 
     this->app.game = &game;
+    this->app.width = width;
+    this->app.height = height;
 
     //Initialize SDL
     SDL_Init(SDL_INIT_VIDEO)
@@ -178,14 +208,6 @@ void Engine::run() {
     }
 };
 
-void Engine::shutdown() {
-    this->glShutdown();
-
-    SDL_GL_DeleteContext( app.context );
-    SDL_DestroyWindow( app.window );
-    SDL_Quit();
-};
-
 void Engine::prepareScene(void)
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -193,10 +215,16 @@ void Engine::prepareScene(void)
 
 void Engine::presentScene(void)
 {
+    // Update main camera buffers
+    if (main_camera.camera) {
+        glBindCamera(*main_camera.camera, main_camera.g_uiUBO);
+    }
+
     // Specify VAO to use
     for (unsigned i = 0; i < scene_data.mp_Meshes.size(); i++) {
         glBindVertexArray(scene_data.mp_Meshes[i].m_uiVAO);
         // std::cout << fmt::format("{}, {}, {}, {}", scene_data.mp_Meshes[0].m_uiVAO, scene_data.mp_Meshes[0].m_uiVBO, scene_data.mp_Meshes[0].m_uiIBO, scene_data.mp_Meshes[0].m_uiNumIndices) << std::endl;
+        // std::cout << glm::to_string(this->main_camera->asViewProjectionMatrix()) << std::endl;
     
         // Draw the triangle
         glDrawElements(GL_TRIANGLES, scene_data.mp_Meshes[i].m_uiNumIndices, GL_UNSIGNED_INT, 0);
@@ -204,6 +232,14 @@ void Engine::presentScene(void)
     
     SDL_GL_SwapWindow(app.window);
 }
+
+void Engine::shutdown() {
+    this->glShutdown();
+
+    SDL_GL_DeleteContext( app.context );
+    SDL_DestroyWindow( app.window );
+    SDL_Quit();
+};
 
 void Engine::glShutdown() {
     // Release the shader program
