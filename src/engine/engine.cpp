@@ -7,11 +7,28 @@
 #include "fmt/core.h"
 #include "input/input.h"
 #include "gl/gl_shader.h"
+#include <magic_enum/magic_enum.hpp>
+#include <iostream>
 
 #define _DEBUG
+
 #ifdef _DEBUG
     #include "gl/gl_debug.h"
 #endif
+
+int Engine::add_primitive(Primitives::PrimitiveType type, float size) {
+    switch (type) {
+        case Primitives::CUBE:
+            {
+                GLsizei size_tmp = Primitives::glCreateCube(scene_data);
+                return size_tmp;
+            }
+        default:
+            throw std::runtime_error(fmt::format("Unknown Type: {}", magic_enum::enum_name(type)));
+            break;
+    }
+}
+
 
 bool Engine::glInit() {
 
@@ -45,6 +62,7 @@ bool Engine::glInit() {
 
     GLuint g_uiVAO; //Vertex Array Object, seems to store all the settings (?). Since OpenGL uses global state, binding this lets you context switch
     GLuint g_uiVBO; //Vertex Buffer Object, stores vertex data GPU side
+    GLuint g_uiIBO; //Index Buffer Object, stores index data connecting vertices in groups of 3 to create triangles
     GLuint g_uiMainProgram;
 
     // Create vertex shader
@@ -70,28 +88,32 @@ bool Engine::glInit() {
     glBindVertexArray(g_uiVAO);
 
     // Create VBO data
-    GLfloat fVertexData[] =
-    {
-        -0.5f, 0.5f,
-         0.0f, -0.5f,
-         0.5f, 0.5f
-    };
+    // GLfloat fVertexData[] =
+    // {
+    //     -0.5f, 0.5f,
+    //      0.0f, -0.5f,
+    //      0.5f, 0.5f
+    // };
 
-    // Create Vertex Buffer Object
-    glGenBuffers(1, &g_uiVBO); // find 1 unused id to create a buffer, g_uiVBO_id = glGenBuffers(1)
-    glBindBuffer(GL_ARRAY_BUFFER, g_uiVBO); //actually create the buffer, of type GL_ARRAY_BUFFER
-    glBufferData(GL_ARRAY_BUFFER, sizeof(fVertexData), fVertexData, GL_STATIC_DRAW); // add the data
+    // // Create Vertex Buffer Object
+    // glGenBuffers(1, &g_uiVBO); // find 1 unused id to create a buffer, g_uiVBO_id = glGenBuffers(1)
+    // glBindBuffer(GL_ARRAY_BUFFER, g_uiVBO); //actually create the buffer, of type GL_ARRAY_BUFFER
+    // glBufferData(GL_ARRAY_BUFFER, sizeof(fVertexData), fVertexData, GL_STATIC_DRAW); // add the data
 
-    // Specify location of data within buffer
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), (const GLvoid *)0);
-    glEnableVertexAttribArray(0);
+    // // Specify location of data within buffer
+    // glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), (const GLvoid *)0);
+    // glEnableVertexAttribArray(0);
 
-    // Specify program to use
+    // // Specify program to use
     glUseProgram(g_uiMainProgram);
 
-    this->gl_context.g_uiVAO = g_uiVAO;
-    this->gl_context.g_uiVBO = g_uiVBO;
-    this->gl_context.g_uiMainProgram = g_uiMainProgram;
+    // this->gl_context.g_uiVAO = g_uiVAO;
+    // this->gl_context.g_uiVBO = g_uiVBO;
+
+    add_primitive(Primitives::CUBE, 1.0f);
+
+
+    this->gl_programs.g_uiMainProgram = g_uiMainProgram;
 
     return true;
 }
@@ -172,19 +194,25 @@ void Engine::prepareScene(void)
 void Engine::presentScene(void)
 {
     // Specify VAO to use
-    glBindVertexArray(gl_context.g_uiVAO);
+    for (unsigned i = 0; i < scene_data.mp_Meshes.size(); i++) {
+        glBindVertexArray(scene_data.mp_Meshes[i].m_uiVAO);
+        // std::cout << fmt::format("{}, {}, {}, {}", scene_data.mp_Meshes[0].m_uiVAO, scene_data.mp_Meshes[0].m_uiVBO, scene_data.mp_Meshes[0].m_uiIBO, scene_data.mp_Meshes[0].m_uiNumIndices) << std::endl;
     
-    // Draw the triangle
-    glDrawArrays(GL_TRIANGLES, 0, 3);
-
+        // Draw the triangle
+        glDrawElements(GL_TRIANGLES, scene_data.mp_Meshes[i].m_uiNumIndices, GL_UNSIGNED_INT, 0);
+    }
+    
     SDL_GL_SwapWindow(app.window);
 }
 
 void Engine::glShutdown() {
     // Release the shader program
-    glDeleteProgram(gl_context.g_uiMainProgram);
+    glDeleteProgram(gl_programs.g_uiMainProgram);
 
-    // Delete VBO and VAO
-    glDeleteBuffers(1, &gl_context.g_uiVBO);
-    glDeleteVertexArrays(1, &gl_context.g_uiVAO);
+    // Delete VBO and VAO, and IBO
+    for (unsigned i = 0; i < scene_data.mp_Meshes.size(); i++) {
+        glDeleteBuffers(1, &scene_data.mp_Meshes[i].m_uiVBO);
+        glDeleteBuffers(1, &scene_data.mp_Meshes[i].m_uiIBO);
+        glDeleteVertexArrays(1, &scene_data.mp_Meshes[i].m_uiVAO);
+    }
 }

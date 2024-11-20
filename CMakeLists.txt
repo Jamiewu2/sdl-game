@@ -12,11 +12,27 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 #Dependencies
-FetchContent_Declare(fmt
-  GIT_REPOSITORY https://github.com/fmtlib/fmt.git
-  GIT_TAG master
+FetchContent_Declare(
+    fmt
+    GIT_REPOSITORY https://github.com/fmtlib/fmt.git
+    GIT_TAG master
 )
 FetchContent_MakeAvailable(fmt)
+
+FetchContent_Declare(
+    glm
+	GIT_REPOSITORY	https://github.com/g-truc/glm.git
+	GIT_TAG 	bf71a834948186f4097caa076cd2663c69a10e1e #refs/tags/1.0.1
+)
+FetchContent_MakeAvailable(glm)
+
+FetchContent_Declare(
+    magic_enum
+	GIT_REPOSITORY	https://github.com/Neargye/magic_enum.git
+	GIT_TAG 	master
+)
+FetchContent_MakeAvailable(magic_enum)
+
 
 # Create an option to switch between a system sdl library and a vendored sdl library
 option(MYGAME_VENDORED "Use vendored libraries" ON)
@@ -45,6 +61,7 @@ add_executable(HelloSDL src/main.cpp
         src/engine/gl/gl_shader.cpp
         src/engine/gl/gl_debug.cpp
         src/engine/util/ExpectedWrapper.cpp
+        src/engine/mesh/primitives.cpp
         src/game.cpp
     )
 target_include_directories(HelloSDL PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
@@ -61,7 +78,7 @@ endif()
 target_link_libraries(HelloSDL PRIVATE SDL2::SDL2)
 
 # Link other dependencies
-target_link_libraries(HelloSDL PRIVATE fmt::fmt OpenGL::GL GLEW::GLEW)
+target_link_libraries(HelloSDL PRIVATE fmt::fmt OpenGL::GL GLEW::GLEW glm::glm magic_enum::magic_enum)
 
 #copy shaders
 # add_custom_command(

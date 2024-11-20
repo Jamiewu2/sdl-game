@@ -4,7 +4,7 @@
 
 #include "GL/glew.h"
 #include "SDL2/SDL.h"
-
+#include "gl/gl_scene.h"
 
 class Engine {
 
@@ -16,6 +16,9 @@ class Engine {
         void run();
         void shutdown();
 
+        int add_primitive(Primitives::PrimitiveType type, float size);
+        int add_mesh();
+
     private:
         typedef struct {
             Game* game;
@@ -25,13 +28,12 @@ class Engine {
         } App;
 
         typedef struct {
-            GLuint g_uiVAO;
-            GLuint g_uiVBO;
             GLuint g_uiMainProgram;
-        } GLContext;
+        } GLPrograms;
 
         App app;
-        GLContext gl_context;
+        SceneData scene_data;
+        GLPrograms gl_programs;
 
         void prepareScene();
         void presentScene();
@@ -39,3 +41,4 @@ class Engine {
         bool glInit();
         void glShutdown();
 };
+
