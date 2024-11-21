@@ -64,6 +64,7 @@ add_executable(HelloSDL src/main.cpp
         src/engine/util/ExpectedWrapper.cpp
         src/engine/mesh/primitives.cpp
         src/engine/render/camera.cpp
+        src/engine/input/input.cpp
         src/game.cpp
     )
 target_include_directories(HelloSDL PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)

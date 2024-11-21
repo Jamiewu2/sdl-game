@@ -6,6 +6,7 @@
 #include "SDL2/SDL.h"
 #include "gl/gl_scene.h"
 #include "render/camera.h"
+#include "input/input.h"
 #include <memory>
 
 class Engine {
@@ -45,6 +46,8 @@ class Engine {
         SceneData scene_data;
         GLCamera main_camera;
         GLPrograms gl_programs;
+
+        void update(Input input, float delta);
 
         void prepareScene();
         void presentScene();

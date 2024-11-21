@@ -79,9 +79,9 @@ bool Engine::glInit() {
     glEnable(GL_DEPTH_TEST);              // Enable use of depth testing
     glDisable(GL_STENCIL_TEST);           // Disable stencil test for speed
 
-    GLuint g_uiVAO; //Vertex Array Object, seems to store all the settings (?). Since OpenGL uses global state, binding this lets you context switch
-    GLuint g_uiVBO; //Vertex Buffer Object, stores vertex data GPU side
-    GLuint g_uiIBO; //Index Buffer Object, stores index data connecting vertices in groups of 3 to create triangles
+    // GLuint g_uiVAO; //Vertex Array Object, seems to store all the settings (?). Since OpenGL uses global state, binding this lets you context switch
+    // GLuint g_uiVBO; //Vertex Buffer Object, stores vertex data GPU side
+    // GLuint g_uiIBO; //Index Buffer Object, stores index data connecting vertices in groups of 3 to create triangles
     GLuint g_uiMainProgram;
 
     // Create vertex shader
@@ -102,32 +102,9 @@ bool Engine::glInit() {
     glDeleteShader(uiVertexShader);
     glDeleteShader(uiFragmentShader);
 
-    // Create a Vertex Array Object
-    // glGenVertexArrays(1, &g_uiVAO);
-    // glBindVertexArray(g_uiVAO);
-
-    // Create VBO data
-    // GLfloat fVertexData[] =
-    // {
-    //     -0.5f, 0.5f,
-    //      0.0f, -0.5f,
-    //      0.5f, 0.5f
-    // };
-
-    // // Create Vertex Buffer Object
-    // glGenBuffers(1, &g_uiVBO); // find 1 unused id to create a buffer, g_uiVBO_id = glGenBuffers(1)
-    // glBindBuffer(GL_ARRAY_BUFFER, g_uiVBO); //actually create the buffer, of type GL_ARRAY_BUFFER
-    // glBufferData(GL_ARRAY_BUFFER, sizeof(fVertexData), fVertexData, GL_STATIC_DRAW); // add the data
-
-    // // Specify location of data within buffer
-    // glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), (const GLvoid *)0);
-    // glEnableVertexAttribArray(0);
-
-    // // Specify program to use
+    // Specify program to use
     glUseProgram(g_uiMainProgram);
-
-    // this->gl_context.g_uiVAO = g_uiVAO;
-    // this->gl_context.g_uiVBO = g_uiVBO;
+    this->gl_programs.g_uiMainProgram = g_uiMainProgram;
 
     //tmp stuff
     add_primitive(Primitives::CUBE, 1.0f);
@@ -139,9 +116,6 @@ bool Engine::glInit() {
     // assume camera never changes
     // Bind camera UBO
     glBindBufferBase(GL_UNIFORM_BUFFER, 1, uiUBO);
-
-
-    this->gl_programs.g_uiMainProgram = g_uiMainProgram;
 
     return true;
 }
@@ -200,13 +174,44 @@ Engine::~Engine() {
 }
 
 void Engine::run() {
+    Input input = Input();
+
+    Uint32 old_elapsed = SDL_GetTicks();
     while (true) {
+        Uint32 current_elapsed = SDL_GetTicks();
+        float delta = (float)(current_elapsed - old_elapsed) / 1000.0f;
         prepareScene();
-        doInput();
+        input.reset_frame();
+        input.doInput();
+        update(input, delta);
         presentScene();
         SDL_Delay(16);
+
+        old_elapsed = current_elapsed;
     }
 };
+
+void Engine::update(Input input, float delta) {
+    const float SPEED = 10.0f;
+
+    if (main_camera.camera) {
+        if (input.isPressed(PlayerInputEvent::CAMERA_UP)) {
+            main_camera.camera->translate(vec3{0.0f, SPEED * delta, 0.0f});
+        }
+
+        if (input.isPressed(PlayerInputEvent::CAMERA_DOWN)) {
+            main_camera.camera->translate(vec3{0.0f, -SPEED * delta, 0.0f});
+        }
+
+        if (input.isPressed(PlayerInputEvent::CAMERA_LEFT)) {
+            main_camera.camera->translate(vec3{-SPEED * delta, 0.0f, 0.0f});
+        }
+
+        if (input.isPressed(PlayerInputEvent::CAMERA_RIGHT)) {
+            main_camera.camera->translate(vec3{SPEED * delta, 0.0f, 0.0f});
+        }
+    }
+}
 
 void Engine::prepareScene(void)
 {
@@ -244,6 +249,11 @@ void Engine::shutdown() {
 void Engine::glShutdown() {
     // Release the shader program
     glDeleteProgram(gl_programs.g_uiMainProgram);
+
+    // Delete Camera
+    if (main_camera.camera) {
+        glDeleteBuffers(1, &main_camera.g_uiUBO);
+    }
 
     // Delete VBO and VAO, and IBO
     for (unsigned i = 0; i < scene_data.mp_Meshes.size(); i++) {

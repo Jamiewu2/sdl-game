@@ -14,6 +14,10 @@ mat4 Camera::asViewProjectionMatrix() const {
     return projection * view;
 }
 
+void Camera::translate(vec3 translation) {
+    this->camera_data.position += translation;
+}
+
 //Private fn's
 
 mat4 Camera::asViewMatrix() const {

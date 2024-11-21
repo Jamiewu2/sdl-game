@@ -23,6 +23,8 @@ class Camera {
     public:
         Camera(CameraData camera_data) : camera_data(camera_data) {};
 
+        void translate(glm::vec3 translation);
+
         glm::mat4 asViewProjectionMatrix() const;
 
     private:
